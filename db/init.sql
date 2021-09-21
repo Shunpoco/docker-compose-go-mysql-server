@@ -1,4 +1,4 @@
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
     `id` INT(8) unsigned NOT NULL AUTO_INCREMENT,
     `username` TEXT(255) NOT NULL,
     PRIMARY KEY (`id`)
