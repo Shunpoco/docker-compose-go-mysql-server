@@ -32,7 +32,8 @@ func main() {
 
 	fmt.Println(dataSource)
 
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/get", getHandler)
+	http.HandleFunc("/set", setHandler)
 	server := &http.Server{
 		Addr:    ":5000",
 		Handler: nil,
@@ -40,7 +41,7 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func getHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open(dbDriver, dataSource)
 	defer db.Close()
 	if err != nil {
@@ -80,4 +81,18 @@ func SelectUser(db *sql.DB) (user *User, err error) {
 	}
 
 	return
+}
+
+func setHandler(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open(dbDriver, dataSource)
+	defer db.Close()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	query := "INSERT INTO users (username) VALUES ('George');"
+	_, err = db.Query(query)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
