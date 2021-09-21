@@ -48,21 +48,18 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 
-	fmt.Println("gogo!")
-
-	var newUser *User
-	newUser, err = SelectUser(db)
+	var newUsers []*User
+	newUsers, err = SelectUser(db)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println(newUser)
+	fmt.Println(newUsers)
 
-	json.NewEncoder(w).Encode(newUser)
+	json.NewEncoder(w).Encode(newUsers)
 }
 
-func SelectUser(db *sql.DB) (user *User, err error) {
-	user = new(User)
+func SelectUser(db *sql.DB) (users []*User, err error) {
 
 	query := "SELECT * FROM users"
 	rows, err := db.Query(query)
@@ -75,9 +72,13 @@ func SelectUser(db *sql.DB) (user *User, err error) {
 		return
 	}
 
-	err = rows.Scan(&user.ID, &user.Name)
-	if err != nil {
-		return
+	for rows.Next() {
+		var user = new(User)
+		err = rows.Scan(&user.ID, &user.Name)
+		if err != nil {
+			return
+		}
+		users = append(users, user)
 	}
 
 	return
