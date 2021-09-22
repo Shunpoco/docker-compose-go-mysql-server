@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<head></head>
+<body>
+  <table>
+  {{ range . }}
+    <tr>
+      <td>{{ .ID }}</td>
+      <td>{{ .Title }}</td>
+      <td>{{ .Describe }}</td>
+      <td>{{ .Reference }}</td>
+    </tr>
+  {{ end }}
+  </table>
+</body>

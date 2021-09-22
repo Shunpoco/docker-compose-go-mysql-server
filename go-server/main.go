@@ -2,8 +2,8 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -14,11 +14,14 @@ import (
 var (
 	dbDriver   = "mysql"
 	dataSource string
+	tpl        = template.Must(template.ParseFiles("template/index.html"))
 )
 
-type User struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+type Card struct {
+	ID        int    `json:"id"`
+	Title     string `json:"title"`
+	Describe  string `json:"describe"`
+	Reference string `json:"reference"`
 }
 
 func main() {
@@ -48,20 +51,21 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 
-	var newUsers []*User
-	newUsers, err = SelectUser(db)
+	var newCards []*Card
+	newCards, err = SelectUser(db)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println(newUsers)
-
-	json.NewEncoder(w).Encode(newUsers)
+	fmt.Println(newCards)
+	if err = tpl.Execute(w, newCards); err != nil {
+		fmt.Println(err)
+	}
 }
 
-func SelectUser(db *sql.DB) (users []*User, err error) {
+func SelectUser(db *sql.DB) (cards []*Card, err error) {
 
-	query := "SELECT * FROM users"
+	query := "SELECT * FROM cards"
 	rows, err := db.Query(query)
 	if err != nil {
 		return
@@ -73,12 +77,12 @@ func SelectUser(db *sql.DB) (users []*User, err error) {
 	}
 
 	for rows.Next() {
-		var user = new(User)
-		err = rows.Scan(&user.ID, &user.Name)
+		var card = new(Card)
+		err = rows.Scan(&card.ID, &card.Title, &card.Describe, &card.Reference)
 		if err != nil {
 			return
 		}
-		users = append(users, user)
+		cards = append(cards, card)
 	}
 
 	return
@@ -91,7 +95,7 @@ func setHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 
-	query := "INSERT INTO users (username) VALUES ('George');"
+	query := "INSERT INTO cards (`title`, `describe`, `reference`) VALUES ('test-title', 'test-desc', 'test-refs');"
 	_, err = db.Query(query)
 	if err != nil {
 		fmt.Println(err)
